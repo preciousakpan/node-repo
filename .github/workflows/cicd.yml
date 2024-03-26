@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build and test
+      run: npm run build && npm test
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Plan
+      run: terraform plan
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      env:
+        TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Deploy to AWS
+      run: |
+        # Code to deploy your application to AWS
+
+    - name: Deployment Complete
+      run: echo "Deployment complete. Access your application at http://<public_ip_of_app_server>"
+
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
+      env:
+        TF_VAR_aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        TF_VAR_aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
